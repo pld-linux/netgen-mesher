@@ -1,0 +1,18 @@
+diff -rupN netgen-5.3.0/ng/ngappinit.cpp netgen-5.3.0-new/ng/ngappinit.cpp
+--- netgen-5.3.0/ng/ngappinit.cpp	2014-09-01 20:54:49.511249194 +0200
++++ netgen-5.3.0-new/ng/ngappinit.cpp	2014-09-01 21:03:21.679227844 +0200
+@@ -148,9 +148,11 @@ int main(int argc, char ** argv)
+ 
+   if (getenv ("NETGENDIR") && strlen (getenv ("NETGENDIR")))
+     ngdir = getenv ("NETGENDIR");
+-  else
+-    ngdir = ".";
+-  
++  else {
++    ngdir = "/usr/share/netgen-mesher";
++    setenv("NETGENDIR", ngdir.c_str(), 1);
++  }
++
+   verbose = parameters.GetDefineFlag ("V");
+ 
+   if (verbose)
