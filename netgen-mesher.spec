@@ -47,6 +47,8 @@ BuildRequires:	tk-devel
 BuildRequires:	xorg-lib-libXmu-devel
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
+ExclusiveArch:	%{x8664}
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # false negative _ZN6ngcore11TaskManager9thread_idE from libngcore
 %define		skip_post_check_so	libnglib.so.*
