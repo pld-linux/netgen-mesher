@@ -132,7 +132,7 @@ cd build
 	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/%{name} \
 	-DNG_INSTALL_DIR_LIB=%{_libdir} \
 	-DNG_INSTALL_DIR_CMAKE=%{_libdir}/cmake/%{name} \
-	-DNG_INSTALL_DIR_PYTHON=%{py3_sitearch} \
+	-DNG_INSTALL_DIR_PYTHON=%{py3_sitedir} \
 	-DPREFER_SYSTEM_PYBIND11=ON \
 	-DUSE_JPEG=ON \
 	-DUSE_MPEG=ON \
@@ -184,14 +184,17 @@ Cflags: -I\\\${includedir}\
 EOF\
 %{nil}
 
+rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT{%{_includedir}/%{name}/private,%{_iconsdir}/hicolor/48x48/apps,%{_desktopdir}}
+
 ### mpich version ###
 %if %{with mpich}
 %{__make} -C build-mpich install \
 	DESTDIR=$RPM_BUILD_ROOT
 %writepkgconfig
 # Avoid conflicts with netgen, remove data files (are correctly installed below)
-mv $RPM_BUILD_ROOT/$MPI_BIN/netgen $RPM_BUILD_ROOT/$MPI_BIN/%{name}
-rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.tcl rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.ocf
+%{__mv} $RPM_BUILD_ROOT/$MPI_BIN/netgen $RPM_BUILD_ROOT/$MPI_BIN/%{name}
+%{__rm} $RPM_BUILD_ROOT/$MPI_BIN/*.tcl rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.ocf
 %endif
 
 ### serial version ###
@@ -203,39 +206,26 @@ export MPI_INCLUDE=%{_includedir}
 %writepkgconfig
 
 # Install icon and desktop file
-install -Dpm 0644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
+cp -p %{SOURCE1} $RPM_BUILD_ROOT%{_iconsdir}/hicolor/48x48/apps/%{name}.png
 desktop-file-install --dir $RPM_BUILD_ROOT%{_desktopdir}/ %{SOURCE2}
 
-# Delete the doc folder, the files are in %%doc below
-rm -rf $RPM_BUILD_ROOT%{_prefix}/doc
+# Install the nglib.h header
+cp -p nglib/nglib.h $RPM_BUILD_ROOT%{_includedir}/%{name}/nglib.h
 
 # Install private headers
-(
 cd libsrc
-find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jxx \) -exec install -Dpm 0644 {} $RPM_BUILD_ROOT%{_includedir}/%{name}/private/{} \;
-)
-
-# Install the nglib.h header
-install -Dpm 0644 nglib/nglib.h $RPM_BUILD_ROOT%{_includedir}/%{name}/nglib.h
+find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jxx \) -exec install -Dp {} $RPM_BUILD_ROOT%{_includedir}/%{name}/private/{} \;
 
 %post common
 %update_desktop_database
-/bin/%update_icon_cache_post hicolor &>/dev/null || :
+%update_icon_cache hicolor
 
 %postun common
 %update_desktop_database
-if [ $1 -eq 0 ] ; then
-    /bin/%update_icon_cache_post hicolor &>/dev/null
-    %{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-fi
-
-%posttrans common
-%{_bindir}/gtk-update-icon-cache %{_datadir}/icons/hicolor &>/dev/null || :
-
+%update_icon_cache hicolor
 
 %post libs -p /sbin/ldconfig
 %postun libs -p /sbin/ldconfig
-
 
 %clean
 rm -rf $RPM_BUILD_ROOT
