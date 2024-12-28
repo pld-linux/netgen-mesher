@@ -48,6 +48,9 @@ BuildRequires:	xorg-lib-libXmu-devel
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
 
+# false negative _ZN6ngcore11TaskManager9thread_idE from libngcore
+%define		skip_post_check_so	libnglib.so.*
+
 %description
 NETGEN is an automatic 3d tetrahedral mesh generator. It accepts input
 from constructive solid geometry (CSG) or boundary representation
@@ -55,7 +58,7 @@ from constructive solid geometry (CSG) or boundary representation
 allows the handling of IGES and STEP files. NETGEN contains modules
 for mesh optimization and hierarchical mesh refinement.
 
-%package        common
+%package common
 Summary:	Common files for netgen
 Requires:	hicolor-icon-theme
 Requires:	tix
@@ -64,50 +67,58 @@ BuildArch:	noarch
 %description    common
 Common files for netgen.
 
-%package        libs
+%package libs
 Summary:	Netgen libraries
 
-%description    libs
+%description libs
 Netgen libraries.
 
-%package        devel
+%package devel
 Summary:	Development files for netgen
 Requires:	%{name} = %{version}-%{release}
 
 %description    devel
 Development files for netgen.
 
-%package        devel-private
+%package devel-private
 Summary:	Private headers of netgen
 Requires:	%{name}-devel = %{version}-%{release}
 
-%description    devel-private
+%description devel-private
 Private headers of netgen, needed to build certain netgen based
 software packages.
 
-%package        mpich
+%package -n python3-%{name}
+Summary:        Python3 interface for netgen
+%{?python_provide:%python_provide python3-netgen}
+Requires:       %{name}-openmpi-libs%{?_isa} = %{version}-%{release}
+
+%description -n python3-%{name}
+Python3 interface for netgen.
+
+%package mpich
 Summary:	Netgen compiled against mpich
 # Require explicitly for dir ownership and to guarantee the pickup of the right runtime
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-mpich-libs = %{version}-%{release}
 Requires:	mpich
 
-%description    mpich
+%description mpich
 Netgen compiled against mpich.
 
-%package        mpich-libs
+%package mpich-libs
 Summary:	Netgen libraries compiled against mpich
 
 %description    mpich-libs
 Netgen libraries compiled against mpich.
 
-%package        mpich-devel
+%package mpich-devel
 Summary:	Development files for Netgen compiled against mpich
 # Require explicitly for dir ownership
 Requires:	%{name}-mpich = %{version}-%{release}
 Requires:	mpich-devel
 
-%description    mpich-devel
+%description mpich-devel
 Development files for Netgen compiled against mpich.
 
 %prep
@@ -128,7 +139,7 @@ cd build
 %cmake ../ \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
-	-DNG_INSTALL_SUFFIX=netgen_mesher \
+	-DNG_INSTALL_SUFFIX=netgen-mesher \
 	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/%{name} \
 	-DNG_INSTALL_DIR_LIB=%{_libdir} \
 	-DNG_INSTALL_DIR_CMAKE=%{_libdir}/cmake/%{name} \
@@ -150,7 +161,7 @@ export CXX=mpicxx
 %cmake ../ \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
-	-DNG_INSTALL_SUFFIX=netgen_mesher \
+	-DNG_INSTALL_SUFFIX=netgen-mesher \
 	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/mpich/%{name} \
 	-DNG_INSTALL_DIR_BIN=%{_libdir}/mpich/bin/ \
 	-DNG_INSTALL_DIR_LIB=%{_libdir}/mpich/lib/ \
@@ -241,18 +252,29 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
 
+%files -n python3-%{name}
+%defattr(644,root,root,755)
+%dir %{py3_sitedir}/netgen-mesher
+%{py3_sitedir}/netgen-mesher/*.py
+%attr(755,root,root) %{py3_sitedir}/netgen-mesher/libngguipy.so
+%attr(755,root,root) %{py3_sitedir}/netgen-mesher/libngpy.so
+%{py3_sitedir}/netgen-mesher/config
+%{py3_sitedir}/netgen_mesher-py3.egg-info
+%{py3_sitedir}/pyngcore/*.py
+%attr(755,root,root) %{py3_sitedir}/pyngcore/pyngcore.*.so
+
 %files libs
 %defattr(644,root,root,755)
-%{_libdir}/*.so.*
-%{_libdir}/libnglib-%{version}.so
+%{_libdir}/libng*.so.*.*
 
 %files devel
 %defattr(644,root,root,755)
 %{_includedir}/%{name}
 %exclude %{_includedir}/%{name}/private
 %{_libdir}/*.so
-%exclude %{_libdir}/libnglib-%{version}.so
+%{_libdir}/libngtogl.a
 %{_pkgconfigdir}/%{name}.pc
+%{_libdir}/cmake/netgen-mesher
 
 %files devel-private
 %defattr(644,root,root,755)
@@ -265,13 +287,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files mpich-libs
 %defattr(644,root,root,755)
-%{_libdir}/mpich/lib/*.so.*
-%{_libdir}/mpich/lib/libnglib-%{version}.so
+%{_libdir}/mpich/lib/libng*.so.*.*
 
 %files mpich-devel
 %defattr(644,root,root,755)
 %{_includedir}/mpich*/%{name}
-%{_libdir}/mpich/lib/*.so
+%{_libdir}/mpich/lib/libng*.so
 %{_libdir}/mpich/lib/pkgconfig/%{name}.pc
 %exclude %{_libdir}/mpich/lib/libnglib-%{version}.so
 %endif
