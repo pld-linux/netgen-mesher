@@ -271,7 +271,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_includedir}/%{name}
 %exclude %{_includedir}/%{name}/private
-%{_libdir}/*.so
+%attr(755,root,root) %{_libdir}/*.so
 %{_libdir}/libngtogl.a
 %{_pkgconfigdir}/%{name}.pc
 %{_libdir}/cmake/netgen-mesher
@@ -287,7 +287,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files mpich-libs
 %defattr(644,root,root,755)
-%{_libdir}/mpich/lib/libng*.so.*.*
+%attr(755,root,root) %{_libdir}/mpich/lib/libng*.so.*.*
 
 %files mpich-devel
 %defattr(644,root,root,755)
