@@ -10,35 +10,35 @@ License:	LGPLv2
 Group:		Libraries
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
 # Source0-md5:	0d1dd5b8858e35ed2564ec86703ff602
-Source1:        netgen-mesher.png
+Source1:	%{name}.png
 Source2:	%{name}.desktop
 # Set a default NETGENDIR appropriate for the fedora packaging
 Patch0:		netgen-5.3.0_netgendir.patch
 # Make some includes relative (needed for when headers are in -private subpackage)
 Patch1:		netgen-5.3.0_relative-includes.patch
 # Rename shared libaries (the original names are often way too generic), add library version
-Patch2:         0002-Rename-libraries-add-library-versions.patch
+Patch2:		0002-Rename-libraries-add-library-versions.patch
 # Rename binary in cmake so that exported modules work correctly
-Patch3:         0010-rename-netgen-binary.patch
+Patch3:		0010-rename-netgen-binary.patch
 # Link against libjpeg and ffmpeg
-Patch4:         link-libraries.patch
+Patch4:		link-libraries.patch
 # Fix fallback version
 # See https://bugzilla.redhat.com/show_bug.cgi?id=1993574#c11
-Patch5:         netgen_fallback-version.patch
+Patch5:		netgen_fallback-version.patch
 # Fix Status typedef symbol collision by re-ordering includes
 # /usr/include/mpich-x86_64/mpicxx.h:160:18: error: expected identifier before ‘int’
 #   160 |     friend class Status;
-Patch6:         netgen_include-order.patch
+Patch6:		netgen_include-order.patch
 # Fix invalid egg-info version
-Patch7:         netgen-mesher_egg-info-version.patch
+Patch7:		%{name}_egg-info-version.patch
 Patch8:		std-namespace.patch
 URL:		https://www.ngsolve.org/
 BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	OpenCASCADE-devel
 BuildRequires:	cmake
-BuildRequires:	ffmpeg-devel
 BuildRequires:	desktop-file-utils
 BuildRequires:	dos2unix
+BuildRequires:	ffmpeg-devel
 BuildRequires:	libjpeg-turbo-devel
 BuildRequires:	metis-devel
 %{?with_mpich:BuildRequires:	mpich-c++-devel}
@@ -112,16 +112,15 @@ Development files for Netgen compiled against mpich.
 
 %prep
 %setup -q -n netgen-%{version}
-
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p1
+%patch -P 0 -p1
+%patch -P 1 -p1
+%patch -P 2 -p1
+%patch -P 3 -p1
+%patch -P 4 -p1
+%patch -P 5 -p1
+%patch -P 6 -p1
+%patch -P 7 -p1
+%patch -P 8 -p1
 
 %build
 mkdir -p build
@@ -204,11 +203,11 @@ export MPI_INCLUDE=%{_includedir}
 %writepkgconfig
 
 # Install icon and desktop file
-install -Dpm 0644 %{SOURCE1} %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
-desktop-file-install --dir %{buildroot}/%{_datadir}/applications/ %{SOURCE2}
+install -Dpm 0644 %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
+desktop-file-install --dir $RPM_BUILD_ROOT%{_desktopdir}/ %{SOURCE2}
 
 # Delete the doc folder, the files are in %%doc below
-rm -rf %{buildroot}/%{_prefix}/doc
+rm -rf $RPM_BUILD_ROOT%{_prefix}/doc
 
 # Install private headers
 (
@@ -217,7 +216,7 @@ find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jx
 )
 
 # Install the nglib.h header
-install -Dpm 0644 nglib/nglib.h %{buildroot}%{_includedir}/%{name}/nglib.h
+install -Dpm 0644 nglib/nglib.h $RPM_BUILD_ROOT%{_includedir}/%{name}/nglib.h
 
 %post common
 %update_desktop_database
