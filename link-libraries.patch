@@ -1,0 +1,23 @@
+diff -rupN --no-dereference netgen-6.2.2406/CMakeLists.txt netgen-6.2.2406-new/CMakeLists.txt
+--- netgen-6.2.2406/CMakeLists.txt	2024-12-03 18:26:11.119472907 +0100
++++ netgen-6.2.2406-new/CMakeLists.txt	2024-12-03 18:26:11.383465621 +0100
+@@ -252,6 +252,7 @@ set_target_properties(nglib PROPERTIES V
+ if(USE_GUI)
+     add_library(nggui ${NGGUI_LIBRARY_TYPE})
+     set_target_properties(nggui PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
++    target_link_libraries(nggui PRIVATE ${JPEG_LIBRARIES} ${FFMPEG_LIBRARIES})
+     if(WIN32)
+         set_target_properties( nggui PROPERTIES OUTPUT_NAME "libnggui")
+     endif(WIN32)
+diff -rupN --no-dereference netgen-6.2.2406/ng/CMakeLists.txt netgen-6.2.2406-new/ng/CMakeLists.txt
+--- netgen-6.2.2406/ng/CMakeLists.txt	2024-12-03 18:26:11.376465814 +0100
++++ netgen-6.2.2406-new/ng/CMakeLists.txt	2024-12-03 18:26:11.384465593 +0100
+@@ -23,7 +23,7 @@ if(USE_GUI)
+     if(WIN32)
+       target_sources(netgen PRIVATE ../windows/netgen.rc)
+     endif(WIN32)
+-    target_link_libraries( netgen nglib nggui netgen_python netgen_gui)
++    target_link_libraries( netgen nglib nggui netgen_python netgen_gui ${JPEG_LIBRARIES} ${FFMPEG_LIBRARIES})
+     install(TARGETS netgen ${NG_INSTALL_DIR})
+     if(APPLE)
+         set_target_properties(netgen PROPERTIES OUTPUT_NAME netgen)

@@ -1,42 +1,48 @@
+#
+# Conditional build:
+%bcond_with	mpich		# build mpich packages
+#
 Summary:	Automatic mesh generation tool
 Name:		netgen-mesher
-Version:	5.3.1
+Version:	6.2.2404
 Release:	0.1
 License:	LGPLv2
 Group:		Libraries
-URL:		http://sourceforge.net/projects/netgen-mesher/
-Source0:	http://downloads.sourceforge.net/netgen-mesher/netgen-%{version}.tar.gz
-# Source0-md5:	afd5a9b0b1296c242a9c554f06af6510
-Source1:	%{name}.png
+Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
+# Source0-md5:	0d1dd5b8858e35ed2564ec86703ff602
+Source1:        netgen-mesher.png
 Source2:	%{name}.desktop
-# Fix various configure.ac and Makefiles issues:
-# - Fix configure.ac to correctly detect dependencies
-# - Fix makefile for togl
-# - Rename shared libaries, the original names are often way too generic
-# - Add missing libraries to LIBADD
-# - Fix nglib invalid soname
-Patch0:		netgen-5.3.1_build.patch
-# Some fixes to the code (taken from salome netgen plugin)
-Patch1:		netgen-5.3.0_fixes.patch
-# Fix build against recent metis
-Patch2:		netgen-5.3.0_metis.patch
 # Set a default NETGENDIR appropriate for the fedora packaging
-Patch3:		netgen-5.3.0_netgendir.patch
-# Remove some MSC_VER ifdefs (why are they there?)
-Patch4:		netgen-5.3.0_msc-ver.patch
+Patch0:		netgen-5.3.0_netgendir.patch
 # Make some includes relative (needed for when headers are in -private subpackage)
-Patch5:		netgen-5.3.0_relative-includes.patch
+Patch1:		netgen-5.3.0_relative-includes.patch
+# Rename shared libaries (the original names are often way too generic), add library version
+Patch2:         0002-Rename-libraries-add-library-versions.patch
+# Rename binary in cmake so that exported modules work correctly
+Patch3:         0010-rename-netgen-binary.patch
+# Link against libjpeg and ffmpeg
+Patch4:         link-libraries.patch
+# Fix fallback version
+# See https://bugzilla.redhat.com/show_bug.cgi?id=1993574#c11
+Patch5:         netgen_fallback-version.patch
+# Fix Status typedef symbol collision by re-ordering includes
+# /usr/include/mpich-x86_64/mpicxx.h:160:18: error: expected identifier before ‘int’
+#   160 |     friend class Status;
+Patch6:         netgen_include-order.patch
+# Fix invalid egg-info version
+Patch7:         netgen-mesher_egg-info-version.patch
+Patch8:		std-namespace.patch
+URL:		https://www.ngsolve.org/
 BuildRequires:	Mesa-libGLU-devel
-BuildRequires:	OCE-devel
-BuildRequires:	Togl-devel
-BuildRequires:	autoconf
-BuildRequires:	automake
+BuildRequires:	OpenCASCADE-devel
+BuildRequires:	cmake
+BuildRequires:	ffmpeg-devel
 BuildRequires:	desktop-file-utils
 BuildRequires:	dos2unix
 BuildRequires:	libjpeg-turbo-devel
-BuildRequires:	libtool
 BuildRequires:	metis-devel
-BuildRequires:	mpich-devel
+%{?with_mpich:BuildRequires:	mpich-c++-devel}
+BuildRequires:	python3-pybind11
 BuildRequires:	tk-devel
 BuildRequires:	xorg-lib-libXmu-devel
 Requires:	%{name}-common = %{version}-%{release}
@@ -79,39 +85,6 @@ Requires:	%{name}-devel = %{version}-%{release}
 Private headers of netgen, needed to build certain netgen based
 software packages.
 
-
-
-###############################################################################
-
-%package        openmpi
-Summary:	Netgen compiled against openmpi
-# Require explicitly for dir ownership and to guarantee the pickup of the right runtime
-Requires:	%{name}-common = %{version}-%{release}
-Requires:	%{name}-openmpi-libs = %{version}-%{release}
-Requires:	openmpi
-
-%description    openmpi
-Netgen compiled against openmpi.
-
-%package        openmpi-libs
-Summary:	Netgen libraries compiled against openmpi
-
-%description    openmpi-libs
-Netgen libraries compiled against openmpi.
-
-%package        openmpi-devel
-Summary:	Development files for Netgen compiled against openmpi
-# Require explicitly for dir ownership
-Requires:	%{name}-openmpi = %{version}-%{release}
-Requires:	openmpi-devel
-
-%description    openmpi-devel
-Development files for Netgen compiled against openmpi.
-
-
-
-###############################################################################
-
 %package        mpich
 Summary:	Netgen compiled against mpich
 # Require explicitly for dir ownership and to guarantee the pickup of the right runtime
@@ -137,14 +110,8 @@ Requires:	mpich-devel
 %description    mpich-devel
 Development files for Netgen compiled against mpich.
 
-
-###############################################################################
-
 %prep
 %setup -q -n netgen-%{version}
-
-# Convert line endings
-find . -type f -exec dos2unix {} \;
 
 %patch0 -p1
 %patch1 -p1
@@ -152,53 +119,57 @@ find . -type f -exec dos2unix {} \;
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-
+%patch6 -p1
+%patch7 -p1
+%patch8 -p1
 
 %build
-autoreconf -ifv
-### serial version ###
-mkdir serial
-cd serial
-%configure --enable-occ --with-togl=%{tcl_sitearch}/Togl1.7 --enable-jpeglib \
-		   --includedir=%{_includedir}/%{name} --datadir=%{_datadir}/%{name}
-#		  --enable-ffmpeg
-# Fix unused-direct-shlib-dependency
-sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
-%{__make} %{?_smp_mflags}
-cd ..
+mkdir -p build
+cd build
+%cmake ../ \
+	-DUSE_SUPERBUILD=OFF \
+	-DUSE_NATIVE_ARCH=OFF \
+	-DNG_INSTALL_SUFFIX=netgen_mesher \
+	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/%{name} \
+	-DNG_INSTALL_DIR_LIB=%{_libdir} \
+	-DNG_INSTALL_DIR_CMAKE=%{_libdir}/cmake/%{name} \
+	-DNG_INSTALL_DIR_PYTHON=%{py3_sitearch} \
+	-DPREFER_SYSTEM_PYBIND11=ON \
+	-DUSE_JPEG=ON \
+	-DUSE_MPEG=ON \
+	-DUSE_OCC=ON \
+	-DOpenGL_GL_PREFERENCE=GLVND
 
-### openmpi version ###
-%{_openmpi_load}
-export CXX=mpicxx
-mkdir openmpi
-cd openmpi
-%configure --enable-occ --with-togl=%{tcl_sitearch}/Togl1.7 --enable-jpeglib --enable-parallel \
-		   --bindir=$MPI_BIN --libdir=$MPI_LIB --includedir=$MPI_INCLUDE/%{name} --datadir=%{_datadir}/%{name}
-#		  --enable-ffmpeg
-# Fix unused-direct-shlib-dependency
-sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
-%{__make} %{?_smp_mflags}
-cd ..
-%{_openmpi_unload}
+%{__make}
 
 ### mpich version ###
-%{_mpich_load}
+%if %{with mpich}
+cd ../
+mkdir -p build-mpich
+cd build-mpich
 export CXX=mpicxx
-mkdir mpich
-cd mpich
-%configure --enable-occ --with-togl=%{tcl_sitearch}/Togl1.7 --enable-jpeglib --enable-parallel \
-		   --bindir=$MPI_BIN --libdir=$MPI_LIB --includedir=$MPI_INCLUDE/%{name} --datadir=%{_datadir}/%{name}
-#		  --enable-ffmpeg
-# Fix unused-direct-shlib-dependency
-sed -i -e 's! -shared ! -Wl,--as-needed\0!g' libtool
-%{__make} %{?_smp_mflags}
-cd ..
-%{_mpich_unload}
+%cmake ../ \
+	-DUSE_SUPERBUILD=OFF \
+	-DUSE_NATIVE_ARCH=OFF \
+	-DNG_INSTALL_SUFFIX=netgen_mesher \
+	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/mpich/%{name} \
+	-DNG_INSTALL_DIR_BIN=%{_libdir}/mpich/bin/ \
+	-DNG_INSTALL_DIR_LIB=%{_libdir}/mpich/lib/ \
+	-DNG_INSTALL_DIR_CMAKE=%{_libdir}/mpich/lib/cmake/%{name} \
+	-DNG_INSTALL_DIR_PYTHON=%{_libdir}/mpich/python%{python3_version}/site-packages \
+	-DPREFER_SYSTEM_PYBIND11=ON \
+	-DUSE_JPEG=ON \
+	-DUSE_MPEG=ON \
+	-DUSE_OCC=ON \
+	-DUSE_MPI=ON \
+	-DOpenGL_GL_PREFERENCE=GLVND
+
+%{__make}
+%endif
 
 %install
 %define writepkgconfig() \
-rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT/$MPI_LIB/pkgconfig; \
+install -d -m 0755 $RPM_BUILD_ROOT/$MPI_LIB/pkgconfig; \
 cat > $RPM_BUILD_ROOT/$MPI_LIB/pkgconfig/%{name}.pc << EOF\
 prefix=%{_prefix}\
 exec_prefix=${prefix}\
@@ -214,45 +185,30 @@ Cflags: -I\\\${includedir}\
 EOF\
 %{nil}
 
-### openmpi version ###
-%{_openmpi_load}
-%{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT -C openmpi
-%writepkgconfig
-# Avoid conflicts with netgen, remove data files (are correctly installed below)
-mv $RPM_BUILD_ROOT/$MPI_BIN/netgen $RPM_BUILD_ROOT/$MPI_BIN/%{name}
-rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.tcl rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.ocf
-%{_openmpi_unload}
-
 ### mpich version ###
-%{_mpich_load}
-%{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT -C mpich
+%if %{with mpich}
+%{__make} -C build-mpich install \
+	DESTDIR=$RPM_BUILD_ROOT
 %writepkgconfig
 # Avoid conflicts with netgen, remove data files (are correctly installed below)
 mv $RPM_BUILD_ROOT/$MPI_BIN/netgen $RPM_BUILD_ROOT/$MPI_BIN/%{name}
 rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.tcl rm -f $RPM_BUILD_ROOT/$MPI_BIN/*.ocf
-%{_mpich_unload}
+%endif
 
 ### serial version ###
-%{__make} install \
-	DESTDIR=$RPM_BUILD_ROOT -C serial
+%{__make} -C build install \
+	DESTDIR=$RPM_BUILD_ROOT
+
 export MPI_LIB=%{_libdir}
 export MPI_INCLUDE=%{_includedir}
 %writepkgconfig
-# Avoid conflicts with netgen, move data files to correct place
-mv $RPM_BUILD_ROOT/%{_bindir}/netgen $RPM_BUILD_ROOT/%{_bindir}/%{name}
-mv $RPM_BUILD_ROOT%{_bindir}/*.tcl $RPM_BUILD_ROOT%{_bindir}/*.ocf $RPM_BUILD_ROOT%{_datadir}/%{name}
-chmod -x $RPM_BUILD_ROOT%{_datadir}/%{name}/*.tcl $RPM_BUILD_ROOT%{_datadir}/%{name}/*.ocf
-
-find $RPM_BUILD_ROOT -name '*.la' -exec rm -f {} ';'
 
 # Install icon and desktop file
-install -Dpm 0644 %SOURCE1 $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
-desktop-file-install --dir $RPM_BUILD_ROOT/%{_desktopdir}/ %SOURCE2
+install -Dpm 0644 %{SOURCE1} %{buildroot}%{_datadir}/icons/hicolor/48x48/apps/%{name}.png
+desktop-file-install --dir %{buildroot}/%{_datadir}/applications/ %{SOURCE2}
 
 # Delete the doc folder, the files are in %%doc below
-rm -rf $RPM_BUILD_ROOT/%{_docdir}
+rm -rf %{buildroot}/%{_prefix}/doc
 
 # Install private headers
 (
@@ -260,6 +216,8 @@ cd libsrc
 find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jxx \) -exec install -Dpm 0644 {} $RPM_BUILD_ROOT%{_includedir}/%{name}/private/{} \;
 )
 
+# Install the nglib.h header
+install -Dpm 0644 nglib/nglib.h %{buildroot}%{_includedir}/%{name}/nglib.h
 
 %post common
 %update_desktop_database
@@ -279,11 +237,6 @@ fi
 %post libs -p /sbin/ldconfig
 %postun libs -p /sbin/ldconfig
 
-%post openmpi-libs -p /sbin/ldconfig
-%postun openmpi-libs -p /sbin/ldconfig
-
-%post mpich-libs -p /sbin/ldconfig
-%postun mpich-libs -p /sbin/ldconfig
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -316,22 +269,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_includedir}/%{name}/private
 
-%files openmpi
-%defattr(644,root,root,755)
-%{_libdir}/openmpi/bin/*
-
-%files openmpi-libs
-%defattr(644,root,root,755)
-%{_libdir}/openmpi/lib/*.so.*
-%{_libdir}/openmpi/lib/libnglib-%{version}.so
-
-%files openmpi-devel
-%defattr(644,root,root,755)
-%{_includedir}/openmpi*/%{name}
-%{_libdir}/openmpi/lib/*.so
-%{_libdir}/openmpi/lib/pkgconfig/%{name}.pc
-%exclude %{_libdir}/openmpi/lib/libnglib-%{version}.so
-
+%if %{with mpich}
 %files mpich
 %defattr(644,root,root,755)
 %{_libdir}/mpich/bin/*
@@ -347,3 +285,4 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/mpich/lib/*.so
 %{_libdir}/mpich/lib/pkgconfig/%{name}.pc
 %exclude %{_libdir}/mpich/lib/libnglib-%{version}.so
+%endif

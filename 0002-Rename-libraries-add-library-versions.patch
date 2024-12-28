@@ -1,0 +1,35 @@
+diff -rupN --no-dereference netgen-6.2.2406/CMakeLists.txt netgen-6.2.2406-new/CMakeLists.txt
+--- netgen-6.2.2406/CMakeLists.txt	2024-11-25 17:25:40.000000000 +0100
++++ netgen-6.2.2406-new/CMakeLists.txt	2024-12-03 18:26:10.964477186 +0100
+@@ -248,8 +248,10 @@ endif(APPLE)
+ 
+ #######################################################################
+ add_library(nglib ${NGLIB_LIBRARY_TYPE})
++set_target_properties(nglib PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
+ if(USE_GUI)
+     add_library(nggui ${NGGUI_LIBRARY_TYPE})
++    set_target_properties(nggui PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
+     if(WIN32)
+         set_target_properties( nggui PROPERTIES OUTPUT_NAME "libnggui")
+     endif(WIN32)
+diff -rupN --no-dereference netgen-6.2.2406/libsrc/core/CMakeLists.txt netgen-6.2.2406-new/libsrc/core/CMakeLists.txt
+--- netgen-6.2.2406/libsrc/core/CMakeLists.txt	2024-11-25 17:25:40.000000000 +0100
++++ netgen-6.2.2406-new/libsrc/core/CMakeLists.txt	2024-12-03 18:26:10.964477186 +0100
+@@ -14,6 +14,7 @@ add_library(ngcore ${NGCORE_LIBRARY_TYPE
+   version.cpp
+   ng_mpi_wrapper.cpp
+   )
++set_target_properties(ngcore PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
+ 
+ string(REPLACE "|" ";" ng_compile_flags_replace_sep "${NG_COMPILE_FLAGS}")
+ target_compile_options(ngcore PUBLIC ${ng_compile_flags_replace_sep})
+diff -rupN --no-dereference netgen-6.2.2406/ng/Togl2.1/CMakeLists.txt netgen-6.2.2406-new/ng/Togl2.1/CMakeLists.txt
+--- netgen-6.2.2406/ng/Togl2.1/CMakeLists.txt	2024-11-25 17:25:40.000000000 +0100
++++ netgen-6.2.2406-new/ng/Togl2.1/CMakeLists.txt	2024-12-03 18:26:10.965477158 +0100
+@@ -33,4 +33,6 @@ endif(WIN32)
+ target_include_directories(togl PUBLIC ${OPENGL_INCLUDE_DIR})
+ target_link_libraries(togl PUBLIC ${OPENGL_LIBRARY})
+ set_target_properties(togl PROPERTIES POSITION_INDEPENDENT_CODE ON )
++set_target_properties(togl PROPERTIES OUTPUT_NAME "ngtogl")
++set_target_properties(togl PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
+ install(TARGETS togl DESTINATION ${NG_INSTALL_DIR} COMPONENT netgen)

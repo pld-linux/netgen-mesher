@@ -1,0 +1,124 @@
+diff --git a/external_dependencies/.gitignore b/external_dependencies/.gitignore
+deleted file mode 100644
+index 335ec957..00000000
+--- a/external_dependencies/.gitignore
++++ /dev/null
+@@ -1 +0,0 @@
+-*.tar.gz
+diff --git a/ng/encoding.hpp b/ng/encoding.hpp
+index 9ea2ffb5..67bb09e8 100644
+--- a/ng/encoding.hpp
++++ b/ng/encoding.hpp
+@@ -79,7 +79,7 @@ class Mpeg {
+         ret = avcodec_send_frame(enc, frame);
+         if (ret < 0)
+         {
+-            cerr << "Error encoding video frame: " << endl;
++            std::cerr << "Error encoding video frame: " << std::endl;
+             return(1);
+         }
+ 
+@@ -90,7 +90,7 @@ class Mpeg {
+             return 0;
+ 
+         if (ret < 0) {
+-            cerr << "Error encoding video frame: " << endl;
++            std::cerr << "Error encoding video frame: " << std::endl;
+             return 1;
+         }
+ 
+@@ -106,17 +106,17 @@ class Mpeg {
+         }
+ 
+         if (ret < 0) {
+-            cerr << "Error while writing video frame: " << endl;
++            std::cerr << "Error while writing video frame: " << std::endl;
+             return(1);
+         }
+ 
+         return 0;
+     }
+ 
+-    int Start(string filename) {
++    int Start(std::string filename) {
+         AVCodec *video_codec;
+         if(is_started) {
+-            cerr << "Stream already started" << endl;
++            std::cerr << "Stream already started" << std::endl;
+             return 1;
+         }
+         is_started = true;
+@@ -144,19 +144,19 @@ class Mpeg {
+             /* find the encoder */
+             video_codec = (AVCodec*) avcodec_find_encoder(fmt->video_codec);
+             if (!(video_codec)) {
+-                cerr << "Could not find encoder for '" << avcodec_get_name(fmt->video_codec) << "'" << endl;
++                std::cerr << "Could not find encoder for '" << avcodec_get_name(fmt->video_codec) << "'" << std::endl;
+                 return 1;
+             }
+ 
+             st = avformat_new_stream(oc, NULL);
+             if (!st) {
+-                cerr << "Could not allocate stream\n";
++                std::cerr << "Could not allocate stream\n";
+                 return 1;
+             }
+             st->id = oc->nb_streams-1;
+             enc = avcodec_alloc_context3(video_codec);
+             if (!enc) {
+-                cerr << "Could not alloc an encoding context\n";
++                std::cerr << "Could not alloc an encoding context\n";
+                 return 1;
+             }
+ 
+@@ -187,7 +187,7 @@ class Mpeg {
+ //             enc->global_quality = 1180;
+         }
+         else {
+-            cerr << "could not init codecs!" << endl;
++            std::cerr << "could not init codecs!" << std::endl;
+             return 1;
+         }
+ 
+@@ -197,21 +197,21 @@ class Mpeg {
+         ret = avcodec_open2(enc, video_codec, &opt);
+         av_dict_free(&opt);
+         if (ret < 0) {
+-            cerr << "Could not open video codec" << endl;
++            std::cerr << "Could not open video codec" << std::endl;
+             return 1;
+         }
+ 
+         /* allocate and init a re-usable frame */
+         frame = alloc_picture(enc->pix_fmt);
+         if (!frame) {
+-            cerr << "Could not allocate video frame\n";
++            std::cerr << "Could not allocate video frame\n";
+             return 1;
+         }
+ 
+         /* copy the stream parameters to the muxer */
+         ret = avcodec_parameters_from_context(st->codecpar, enc);
+         if (ret < 0) {
+-            cerr << "Could not copy the stream parameters\n";
++            std::cerr << "Could not copy the stream parameters\n";
+             return 1;
+         }
+ 
+@@ -220,14 +220,14 @@ class Mpeg {
+         if (!(fmt->flags & AVFMT_NOFILE)) {
+             ret = avio_open(&oc->pb, filename.c_str(), AVIO_FLAG_WRITE);
+             if (ret < 0) {
+-                cerr << "Could not open " << filename << " : " << endl;
++                std::cerr << "Could not open " << filename << " : " << std::endl;
+                 return 1;
+             }
+         }
+ 
+         ret = avformat_write_header(oc, &opt);
+         if (ret < 0) {
+-            cerr << "Error occurred when opening output file: " << endl;;
++            std::cerr << "Error occurred when opening output file: " << std::endl;;
+             return 1;
+         }
+ 

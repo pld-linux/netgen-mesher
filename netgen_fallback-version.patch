@@ -1,0 +1,14 @@
+diff -rupN --no-dereference netgen-6.2.2406/cmake/generate_version_file.cmake netgen-6.2.2406-new/cmake/generate_version_file.cmake
+--- netgen-6.2.2406/cmake/generate_version_file.cmake	2024-11-25 17:25:40.000000000 +0100
++++ netgen-6.2.2406-new/cmake/generate_version_file.cmake	2024-12-03 18:26:11.523461757 +0100
+@@ -24,8 +24,8 @@ if(status AND NOT status EQUAL 0)
+       string(REGEX REPLACE "^netgen(.*)" "\\1" git_version_string "${git_version_string}")
+     endif()
+   else()
+-    MESSAGE(WARNING "Could not determine git-version from source code - assuming 6.2.0-0")
+-    set(git_version_string "v6.2.0-0")
++    MESSAGE(WARNING "Could not determine git-version from source code - assuming v6.2.2402")
++    set(git_version_string "v6.2.2402")
+   endif()
+ endif()
+ string(STRIP ${git_version_string} git_version_string)
