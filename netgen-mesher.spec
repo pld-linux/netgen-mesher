@@ -5,7 +5,7 @@
 Summary:	Automatic mesh generation tool
 Name:		netgen-mesher
 Version:	6.2.2404
-Release:	1
+Release:	2
 License:	LGPLv2
 Group:		Libraries
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
@@ -91,9 +91,9 @@ Private headers of netgen, needed to build certain netgen based
 software packages.
 
 %package -n python3-%{name}
-Summary:        Python3 interface for netgen
+Summary:	Python3 interface for netgen
 %{?python_provide:%python_provide python3-netgen}
-Requires:       %{name}-openmpi-libs%{?_isa} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description -n python3-%{name}
 Python3 interface for netgen.
@@ -262,6 +262,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{py3_sitedir}/netgen-mesher/libngpy.so
 %{py3_sitedir}/netgen-mesher/config
 %{py3_sitedir}/netgen_mesher-py3.egg-info
+%dir %{py3_sitedir}/pyngcore
 %{py3_sitedir}/pyngcore/*.py
 %attr(755,root,root) %{py3_sitedir}/pyngcore/pyngcore.*.so
 
