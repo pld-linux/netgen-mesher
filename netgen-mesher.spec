@@ -5,7 +5,7 @@
 Summary:	Automatic mesh generation tool
 Name:		netgen-mesher
 Version:	6.2.2404
-Release:	3
+Release:	4
 License:	LGPLv2
 Group:		Libraries
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
