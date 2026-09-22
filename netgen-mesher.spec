@@ -231,6 +231,9 @@ cp -p nglib/nglib.h $RPM_BUILD_ROOT%{_includedir}/%{name}/nglib.h
 cd libsrc
 find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jxx \) -exec install -Dp {} $RPM_BUILD_ROOT%{_includedir}/%{name}/private/{} \;
 
+%clean
+rm -rf $RPM_BUILD_ROOT
+
 %post common
 %update_desktop_database
 %update_icon_cache hicolor
@@ -239,51 +242,52 @@ find \( -name *.hpp -or -name *.hxx -or -name *.h -or -name *.ixx -or -name *.jx
 %update_desktop_database
 %update_icon_cache hicolor
 
-%post libs -p /sbin/ldconfig
-%postun libs -p /sbin/ldconfig
+%post	libs -p /sbin/ldconfig
+%postun	libs -p /sbin/ldconfig
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%files
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/netgen-mesher
 
 %files common
 %defattr(644,root,root,755)
 %doc AUTHORS doc/ng4.pdf
-%{_datadir}/%{name}/
-%{_iconsdir}/hicolor/48x48/apps/%{name}.png
-%{_desktopdir}/%{name}.desktop
-
-%files
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/*
-
-%files -n python3-%{name}
-%defattr(644,root,root,755)
-%dir %{py3_sitedir}/netgen-mesher
-%{py3_sitedir}/netgen-mesher/*.py
-%attr(755,root,root) %{py3_sitedir}/netgen-mesher/libngguipy.so
-%attr(755,root,root) %{py3_sitedir}/netgen-mesher/libngpy.so
-%{py3_sitedir}/netgen-mesher/config
-%{py3_sitedir}/netgen_mesher-py3.egg-info
-%dir %{py3_sitedir}/pyngcore
-%{py3_sitedir}/pyngcore/*.py
-%attr(755,root,root) %{py3_sitedir}/pyngcore/pyngcore.*.so
+%{_datadir}/%{name}
+%{_iconsdir}/hicolor/48x48/apps/netgen-mesher.png
+%{_desktopdir}/netgen-mesher.desktop
 
 %files libs
 %defattr(644,root,root,755)
-%{_libdir}/libng*.so.*.*
+%{_libdir}/libngcore.so.*.*
+%{_libdir}/libnggui.so.*.*
+%{_libdir}/libnglib.so.*.*
 
 %files devel
 %defattr(644,root,root,755)
+%{_libdir}/libngcore.so
+%{_libdir}/libnggui.so
+%{_libdir}/libnglib.so
+%{_libdir}/libngtogl.a
 %{_includedir}/%{name}
 %exclude %{_includedir}/%{name}/private
-%attr(755,root,root) %{_libdir}/*.so
-%{_libdir}/libngtogl.a
-%{_pkgconfigdir}/%{name}.pc
+%{_pkgconfigdir}/netgen-mesher.pc
 %{_libdir}/cmake/netgen-mesher
 
 %files devel-private
 %defattr(644,root,root,755)
 %{_includedir}/%{name}/private
+
+%files -n python3-%{name}
+%defattr(644,root,root,755)
+%dir %{py3_sitedir}/netgen-mesher
+%{py3_sitedir}/netgen-mesher/*.py
+%{py3_sitedir}/netgen-mesher/libngguipy.so
+%{py3_sitedir}/netgen-mesher/libngpy.so
+%{py3_sitedir}/netgen-mesher/config
+%{py3_sitedir}/netgen_mesher-py3.egg-info
+%dir %{py3_sitedir}/pyngcore
+%{py3_sitedir}/pyngcore/*.py
+%{py3_sitedir}/pyngcore/pyngcore.*.so
 
 %if %{with mpich}
 %files mpich
@@ -292,12 +296,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files mpich-libs
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_libdir}/mpich/lib/libng*.so.*.*
+%{_libdir}/mpich/lib/libng*.so.*.*
 
 %files mpich-devel
 %defattr(644,root,root,755)
 %{_includedir}/mpich*/%{name}
 %{_libdir}/mpich/lib/libng*.so
-%{_libdir}/mpich/lib/pkgconfig/%{name}.pc
+%{_libdir}/mpich/lib/pkgconfig/netgen-mesher.pc
 %exclude %{_libdir}/mpich/lib/libnglib-%{version}.so
 %endif
