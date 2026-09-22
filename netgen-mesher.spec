@@ -32,6 +32,7 @@ Patch6:		netgen_include-order.patch
 # Fix invalid egg-info version
 Patch7:		%{name}_egg-info-version.patch
 Patch8:		std-namespace.patch
+Patch9:		%{name}-arch.patch
 URL:		https://www.ngsolve.org/
 BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	OpenCASCADE-devel
@@ -47,7 +48,7 @@ BuildRequires:	tk-devel
 BuildRequires:	xorg-lib-libXmu-devel
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
-ExclusiveArch:	%{x8664}
+ExclusiveArch:	%{x8664} %{arm} aarch64 i686 pentium2 pentium3 pentium4 athlon
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # false negative _ZN6ngcore11TaskManager9thread_idE from libngcore
@@ -134,6 +135,7 @@ Development files for Netgen compiled against mpich.
 %patch -P 6 -p1
 %patch -P 7 -p1
 %patch -P 8 -p1
+%patch -P 9 -p1
 
 %build
 mkdir -p build
