@@ -244,10 +244,10 @@ libdir=$MPI_LIB\
 includedir=$MPI_INCLUDE/%{name}\
 \
 Name: %{name}\
-Description:  %{summary}\
+Description: %{summary}\
 Version: %{version}\
 Libs: -L\\\${libdir} -lnglib\
-Libs.private: -lngcgs -lnggeom2d -lngmesh -lngocc -lngstl\
+Libs.private: -lngcore
 Cflags: -I\\\${includedir}\
 EOF\
 %{nil}
