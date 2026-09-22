@@ -9,7 +9,7 @@ Summary:	Automatic mesh generation tool
 Summary(pl.UTF-8):	Narzędzie do automatycznego generowania siatek
 Name:		netgen-mesher
 Version:	6.2.2404
-Release:	5
+Release:	6
 License:	LGPL v2
 Group:		Applications/Science
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
@@ -58,7 +58,7 @@ BuildRequires:	xorg-lib-libXmu-devel
 BuildRequires:	zlib-devel
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
-ExclusiveArch:	%{x8664} %{arm} aarch64 i686 pentium2 pentium3 pentium4 athlon
+ExclusiveArch:	%{x8664} %{arm} aarch64 i686 pentium2 pentium3 pentium4 athlon x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 # false negative _ZN6ngcore11TaskManager9thread_idE from libngcore
