@@ -247,7 +247,7 @@ Name: %{name}\
 Description: %{summary}\
 Version: %{version}\
 Libs: -L\\\${libdir} -lnglib\
-Libs.private: -lngcore
+Libs.private: -lngcore\
 Cflags: -I\\\${includedir}\
 EOF\
 %{nil}
