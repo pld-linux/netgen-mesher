@@ -1,3 +1,6 @@
+# TODO:
+# USE_SPDLOG?
+# USE_CGNS? (requires cgnslib.h + libsgns, <https://github.com/CGNS/CGNS>)
 #
 # Conditional build:
 %bcond_with	mpich		# build mpich packages
@@ -35,18 +38,24 @@ Patch7:		%{name}_egg-info-version.patch
 Patch8:		std-namespace.patch
 Patch9:		%{name}-arch.patch
 URL:		https://www.ngsolve.org/
-BuildRequires:	Mesa-libGLU-devel
 BuildRequires:	OpenCASCADE-devel
-BuildRequires:	cmake
+BuildRequires:	OpenGL-devel
+BuildRequires:	OpenGL-GLU-devel
+BuildRequires:	cmake >= 3.16
 BuildRequires:	desktop-file-utils
 BuildRequires:	dos2unix
 BuildRequires:	ffmpeg-devel
 BuildRequires:	libjpeg-turbo-devel
+BuildRequires:	libstdc++-devel >= 6:7
 BuildRequires:	metis-devel
 %{?with_mpich:BuildRequires:	mpich-c++-devel}
+BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-pybind11
-BuildRequires:	tk-devel
+BuildRequires:	tcl-devel >= 8.5
+BuildRequires:	tk-devel >= 8.5
+BuildRequires:	xorg-lib-libX11-devel
 BuildRequires:	xorg-lib-libXmu-devel
+BuildRequires:	zlib-devel
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-libs = %{version}-%{release}
 ExclusiveArch:	%{x8664} %{arm} aarch64 i686 pentium2 pentium3 pentium4 athlon
@@ -98,7 +107,7 @@ Biblioteki Netgen.
 Summary:	Development files for Netgen
 Summary(pl.UTF-8):	Pliki programistyczne Netgen
 Group:		Development/Libraries
-Requires:	%{name} = %{version}-%{release}
+Requires:	%{name}-libs = %{version}-%{release}
 
 %description devel
 Development files for Netgen.
@@ -187,9 +196,7 @@ Pliki programistyczne Netgen z obsługą mpich.
 %patch -P 9 -p1
 
 %build
-mkdir -p build
-cd build
-%cmake ../ \
+%cmake -B build \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
 	-DNG_INSTALL_SUFFIX=netgen-mesher \
@@ -203,15 +210,12 @@ cd build
 	-DUSE_OCC=ON \
 	-DOpenGL_GL_PREFERENCE=GLVND
 
-%{__make}
+%{__make} -C build
 
 ### mpich version ###
 %if %{with mpich}
-cd ../
-mkdir -p build-mpich
-cd build-mpich
 export CXX=mpicxx
-%cmake ../ \
+%cmake -B build-mpich \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
 	-DNG_INSTALL_SUFFIX=netgen-mesher \
@@ -227,7 +231,7 @@ export CXX=mpicxx
 	-DUSE_MPI=ON \
 	-DOpenGL_GL_PREFERENCE=GLVND
 
-%{__make}
+%{__make} -C build-mpich
 %endif
 
 %install
