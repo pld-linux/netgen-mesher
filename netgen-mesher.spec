@@ -3,11 +3,12 @@
 %bcond_with	mpich		# build mpich packages
 #
 Summary:	Automatic mesh generation tool
+Summary(pl.UTF-8):	Narzędzie do automatycznego generowania siatek
 Name:		netgen-mesher
 Version:	6.2.2404
 Release:	5
-License:	LGPLv2
-Group:		Libraries
+License:	LGPL v2
+Group:		Applications/Science
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
 # Source0-md5:	0d1dd5b8858e35ed2564ec86703ff602
 Source1:	%{name}.png
@@ -55,52 +56,87 @@ BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %define		skip_post_check_so	libnglib.so.*
 
 %description
-NETGEN is an automatic 3d tetrahedral mesh generator. It accepts input
+NETGEN is an automatic 3D tetrahedral mesh generator. It accepts input
 from constructive solid geometry (CSG) or boundary representation
 (BRep) from STL file format. The connection to a geometry kernel
 allows the handling of IGES and STEP files. NETGEN contains modules
 for mesh optimization and hierarchical mesh refinement.
 
+%description -l pl.UTF-8
+NETGEN to automatyczny generator siatek tetraedralnych 3D. Przyjmuje
+na wejściu pliki w formacie CSG (Constructive Solid Geometry) lub STL
+(reprezentację ograniczeń - BRep). Połączenie z jądrem geometrycznym
+pozwala na obsługę plików IGES oraz STEP. NETGEN zawiera moduły do
+optymalizacji oraz hierarchicznego zagęszczania siatki.
+
 %package common
 Summary:	Common files for netgen
+Summary(pl.UTF-8):	Wspólne pliki netgen
+Group:		Applications/Science
 Requires:	hicolor-icon-theme
 Requires:	tix
 BuildArch:	noarch
 
-%description    common
+%description common
 Common files for netgen.
+
+%description common -l pl.UTF-8
+Wspólne pliki netgen.
 
 %package libs
 Summary:	Netgen libraries
+Summary(pl.UTF-8):	Biblioteki Netgen
+Group:		Libraries
 
 %description libs
 Netgen libraries.
 
+%description libs -l pl.UTF-8
+Biblioteki Netgen.
+
 %package devel
-Summary:	Development files for netgen
+Summary:	Development files for Netgen
+Summary(pl.UTF-8):	Pliki programistyczne Netgen
+Group:		Development/Libraries
 Requires:	%{name} = %{version}-%{release}
 
-%description    devel
-Development files for netgen.
+%description devel
+Development files for Netgen.
+
+%description devel -l pl.UTF-8
+Pliki programistyczne Netgen.
 
 %package devel-private
-Summary:	Private headers of netgen
+Summary:	Private headers of Netgen
+Summary(pl.UTF-8):	Prywatne pliki nagłówkowe Netgen
+Group:		Development/Libraries
 Requires:	%{name}-devel = %{version}-%{release}
 
 %description devel-private
-Private headers of netgen, needed to build certain netgen based
+Private headers of Netgen, needed to build certain netgen based
 software packages.
 
+%description devel-private -l pl.UTF-8
+Prywatne pliki nagłówkowe Netgen, potrzebne do budowania niektórych
+pakietów oprogramowania opartego na netgen.
+
 %package -n python3-%{name}
-Summary:	Python3 interface for netgen
+Summary:	Python 3 interface for Netgen
+Summary(pl.UTF-8):	Interfejs Pythona 3 do Netgen
+Group:		Libraries/Python
 %{?python_provide:%python_provide python3-netgen}
 Requires:	%{name}-libs = %{version}-%{release}
 
 %description -n python3-%{name}
-Python3 interface for netgen.
+Python 3 interface for Netgen.
+
+%description -n python3-%{name} -l pl.UTF-8
+Interfejs Pythona 3 do Netgen.
 
 %package mpich
 Summary:	Netgen compiled against mpich
+Summary(pl.UTF-8):	Netgen skompilowany z obsługą mpich
+Group:		Applications/Science
 # Require explicitly for dir ownership and to guarantee the pickup of the right runtime
 Requires:	%{name}-common = %{version}-%{release}
 Requires:	%{name}-mpich-libs = %{version}-%{release}
@@ -109,20 +145,33 @@ Requires:	mpich
 %description mpich
 Netgen compiled against mpich.
 
+%description mpich -l pl.UTF-8
+Netgen skompilowany z obsługą mpich.
+
 %package mpich-libs
 Summary:	Netgen libraries compiled against mpich
+Summary(pl.UTF-8):	Biblioteki Netgen skompilowane z obsługą mpich
+Group:		Development/Libraries
 
-%description    mpich-libs
+%description mpich-libs
 Netgen libraries compiled against mpich.
+
+%description mpich-libs -l pl.UTF-8
+Biblioteki Netgen skompilowane z obsługą mpich.
 
 %package mpich-devel
 Summary:	Development files for Netgen compiled against mpich
+Summary(pl.UTF-8):	Pliki programistyczne Netgen z obsługą mpich
+Group:		Development/Libraries
 # Require explicitly for dir ownership
 Requires:	%{name}-mpich = %{version}-%{release}
 Requires:	mpich-devel
 
 %description mpich-devel
 Development files for Netgen compiled against mpich.
+
+%description mpich-devel -l pl.UTF-8
+Pliki programistyczne Netgen z obsługą mpich.
 
 %prep
 %setup -q -n netgen-%{version}
