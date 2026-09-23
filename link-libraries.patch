@@ -10,16 +10,3 @@ diff -rupN --no-dereference netgen-6.2.2406/CMakeLists.txt netgen-6.2.2406-new/C
  
      if(WIN32)
        target_compile_definitions(netgen_gui INTERFACE -DTOGL_WGL)
-@@ -417,9 +417,9 @@
-       target_link_libraries(occ_libs INTERFACE Threads::Threads)
-     endif()
-     message(STATUS "OCC DIRS ${OpenCASCADE_INCLUDE_DIR}")
--    if(WIN32 AND USE_GUI)
--      target_link_libraries(nggui PRIVATE occ_libs Ws2_32.lib)
--    endif(WIN32 AND USE_GUI)
-+    if(USE_GUI)
-+      target_link_libraries(nggui PRIVATE occ_libs)
-+    endif(USE_GUI)
- endif (USE_OCC)
- 
- #######################################################################

@@ -12,12 +12,11 @@ diff -rupN --no-dereference netgen-6.2.2406/CMakeLists.txt netgen-6.2.2406-new/C
      if(WIN32)
          set_target_properties( nggui PROPERTIES OUTPUT_NAME "libnggui")
      endif(WIN32)
-diff -rupN --no-dereference netgen-6.2.2406/libsrc/core/CMakeLists.txt netgen-6.2.2406-new/libsrc/core/CMakeLists.txt
---- netgen-6.2.2406/libsrc/core/CMakeLists.txt	2024-11-25 17:25:40.000000000 +0100
-+++ netgen-6.2.2406-new/libsrc/core/CMakeLists.txt	2024-12-03 18:26:10.964477186 +0100
-@@ -14,6 +14,7 @@ add_library(ngcore ${NGCORE_LIBRARY_TYPE
-   version.cpp
+--- netgen-6.2.2607/libsrc/core/CMakeLists.txt.orig	2026-09-07 10:52:07.000000000 +0200
++++ netgen-6.2.2607/libsrc/core/CMakeLists.txt	2026-09-23 17:08:41.017721616 +0200
+@@ -16,6 +16,7 @@ add_library(ngcore ${NGCORE_LIBRARY_TYPE
    ng_mpi_wrapper.cpp
+   statushandler.cpp
    )
 +set_target_properties(ngcore PROPERTIES VERSION ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR})
  

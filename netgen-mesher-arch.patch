@@ -1,18 +1,5 @@
---- netgen-6.2.2404/libsrc/core/table.hpp.orig	2024-06-12 20:10:06.000000000 +0200
-+++ netgen-6.2.2404/libsrc/core/table.hpp	2026-09-19 21:17:18.232517429 +0200
-@@ -103,8 +103,10 @@ namespace ngcore
-   { return TablePrefixSum32 (FlatArray<unsigned> (entrysize.Size(), (unsigned int*)(int*)(entrysize.Addr(0)))); }
-   NETGEN_INLINE size_t * TablePrefixSum (FlatArray<std::atomic<int>> entrysize)
-   { return TablePrefixSum32 (FlatArray<unsigned> (entrysize.Size(), (unsigned int*)(std::atomic<int>*)entrysize.Addr(0))); }
-+#ifdef __LP64__
-   NETGEN_INLINE size_t * TablePrefixSum (FlatArray<size_t> entrysize)
-   { return TablePrefixSum64 (entrysize); }
-+#endif
- 
- 
-   /**
---- netgen-6.2.2404/libsrc/core/utils.hpp.orig	2024-06-12 20:10:06.000000000 +0200
-+++ netgen-6.2.2404/libsrc/core/utils.hpp	2026-09-19 21:18:32.285449583 +0200
+--- netgen-6.2.2607/libsrc/core/utils.hpp.orig	2026-09-07 10:52:07.000000000 +0200
++++ netgen-6.2.2607/libsrc/core/utils.hpp	2026-09-23 17:20:08.130665873 +0200
 @@ -16,7 +16,7 @@
  #include <mach/mach_time.h>
  #endif
@@ -22,15 +9,15 @@
  #ifdef WIN32
  #include <intrin.h>   // for __rdtsc()  CPU time step counter
  #else
-@@ -65,7 +65,7 @@ namespace ngcore
+@@ -63,7 +63,7 @@ namespace ngcore
+ 
+   inline TTimePoint GetTimeCounter() noexcept
    {
- #if defined(__APPLE__) && defined(NETGEN_ARCH_ARM64)
-     return mach_absolute_time();
--#elif defined(NETGEN_ARCH_AMD64)
-+#elif defined(NETGEN_ARCH_AMD64) || defined(__i686__)
+-#if defined(NETGEN_ARCH_AMD64)
++#if defined(NETGEN_ARCH_AMD64) || defined(__i686__)
      return __rdtsc();
- #elif defined(NETGEN_ARCH_ARM64) && defined(__GNUC__)
-     // __GNUC__ is also defined by CLANG. Use inline asm to read Generic Timer
+ #elif defined(NETGEN_ARCH_ARM64)
+     unsigned long long tics;
 --- netgen-6.2.2404/libsrc/core/python_ngcore.hpp.orig	2024-06-12 20:10:06.000000000 +0200
 +++ netgen-6.2.2404/libsrc/core/python_ngcore.hpp	2026-09-19 21:23:45.953750296 +0200
 @@ -182,10 +182,12 @@ namespace ngcore

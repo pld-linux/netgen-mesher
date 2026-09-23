@@ -8,12 +8,12 @@
 Summary:	Automatic mesh generation tool
 Summary(pl.UTF-8):	Narzędzie do automatycznego generowania siatek
 Name:		netgen-mesher
-Version:	6.2.2404
-Release:	6
+Version:	6.2.2607
+Release:	1
 License:	LGPL v2
 Group:		Applications/Science
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
-# Source0-md5:	0d1dd5b8858e35ed2564ec86703ff602
+# Source0-md5:	b7602cadeb38e27fe6f93d7d4581ede1
 Source1:	%{name}.png
 Source2:	%{name}.desktop
 # Set a default NETGENDIR appropriate for the fedora packaging
@@ -61,8 +61,9 @@ Requires:	%{name}-libs = %{version}-%{release}
 ExclusiveArch:	%{x8664} %{arm} aarch64 i686 pentium2 pentium3 pentium4 athlon x32
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
-# false negative _ZN6ngcore11TaskManager9thread_idE from libngcore
-%define		skip_post_check_so	libnglib.so.*
+# libnggui: non-function symbols _ZN6ngcore11TaskManager15timer_thread_idE, _ZN6ngcore11TaskManager11worker_dataE from libngcore
+# libnglib: non-function symbols _ZN6ngcore11TaskManager15timer_thread_idE, _ZN6ngcore11TaskManager11worker_dataE, _ZN6ngcore11TaskManager9thread_idE, _ZN6ngcore12task_managerE from libngcore
+%define		skip_post_check_so	libnggui.so.* libnglib.so.*
 
 %description
 NETGEN is an automatic 3D tetrahedral mesh generator. It accepts input

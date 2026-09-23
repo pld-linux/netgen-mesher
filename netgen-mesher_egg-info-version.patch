@@ -1,12 +1,23 @@
-diff -rupN --no-dereference netgen-6.2.2406/CMakeLists.txt netgen-6.2.2406-new/CMakeLists.txt
---- netgen-6.2.2406/CMakeLists.txt	2024-12-03 18:26:11.508462171 +0100
-+++ netgen-6.2.2406-new/CMakeLists.txt	2024-12-03 18:26:11.752455437 +0100
-@@ -641,7 +641,7 @@ if(USE_PYTHON AND NOT SKBUILD)
-   file( WRITE "netgen_mesher-py3.egg-info"
- "Metadata-Version: 2.1
- Name: netgen-mesher
--Version: ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR}.${NETGEN_VERSION_PATCH}.post${NETGEN_VERSION_TWEAK}
-+Version: ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR}.${NETGEN_VERSION_PATCH}
- ")
-   install(FILES netgen_mesher-py3.egg-info DESTINATION ${NG_INSTALL_DIR_PYTHON} COMPONENT netgen)
- endif()
+--- netgen-6.2.2607/cmake/generate_version_file.cmake.orig	2026-09-23 17:20:32.073869494 +0200
++++ netgen-6.2.2607/cmake/generate_version_file.cmake	2026-09-23 19:20:38.958159784 +0200
+@@ -33,8 +33,18 @@ string(STRIP ${git_version_string} git_v
+ string(REGEX REPLACE "^v([0-9]+)\\..*" "\\1" NETGEN_VERSION_MAJOR "${git_version_string}")
+ string(REGEX REPLACE "^v[0-9]+\\.([0-9]+).*" "\\1" NETGEN_VERSION_MINOR "${git_version_string}")
+ string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" NETGEN_VERSION_PATCH "${git_version_string}")
+-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+\\-([0-9]+).*" "\\1" NETGEN_VERSION_TWEAK "${git_version_string}")
+-string(REGEX REPLACE "^v[0-9]+\\.[0-9]+\\.[0-9]+\\-[0-9]+\\-([0-9a-z]+).*" "\\1" NETGEN_VERSION_HASH "${git_version_string}")
++string(REGEX MATCH "^v[0-9]+\\.[0-9]+\\.[0-9]+\\-([0-9]+).*" match_tweak "${git_version_string}")
++if(match_tweak)
++  set(NETGEN_VERSION_TWEAK "${CMAKE_MATCH_1}")
++else()
++  set(NETGEN_VERSION_TWEAK "")
++endif()
++string(REGEX MATCH "^v[0-9]+\\.[0-9]+\\.[0-9]+\\-[0-9]+\\-([0-9a-z]+).*" match_hash "${git_version_string}")
++if(match_hash)
++  set(NETGEN_VERSION_HASH "${CMAKE_MATCH_1}")
++else()
++  set(NETGEN_VERSION_HASH "")
++endif()
+ 
+ set(NETGEN_VERSION_SHORT ${NETGEN_VERSION_MAJOR}.${NETGEN_VERSION_MINOR}.${NETGEN_VERSION_PATCH})
+ set(NETGEN_VERSION_LONG ${NETGEN_VERSION_SHORT}-${NETGEN_VERSION_TWEAK}-${NETGEN_VERSION_HASH})
