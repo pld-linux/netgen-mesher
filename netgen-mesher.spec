@@ -9,7 +9,7 @@ Summary:	Automatic mesh generation tool
 Summary(pl.UTF-8):	Narzędzie do automatycznego generowania siatek
 Name:		netgen-mesher
 Version:	6.2.2607
-Release:	2
+Release:	3
 License:	LGPL v2
 Group:		Applications/Science
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
@@ -43,11 +43,10 @@ BuildRequires:	OpenGL-devel
 BuildRequires:	OpenGL-GLU-devel
 BuildRequires:	cmake >= 3.16
 BuildRequires:	desktop-file-utils
-BuildRequires:	dos2unix
 BuildRequires:	ffmpeg-devel
 BuildRequires:	libjpeg-turbo-devel
 BuildRequires:	libstdc++-devel >= 6:7
-BuildRequires:	metis-devel
+%{?with_mpich:BuildRequires:	metis-devel}
 %{?with_mpich:BuildRequires:	mpich-c++-devel}
 BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-pybind11
@@ -84,7 +83,6 @@ Summary:	Common files for netgen
 Summary(pl.UTF-8):	Wspólne pliki netgen
 Group:		Applications/Science
 Requires:	hicolor-icon-theme
-Requires:	tix
 BuildArch:	noarch
 
 %description common
@@ -197,10 +195,13 @@ Pliki programistyczne Netgen z obsługą mpich.
 %patch -P 9 -p1
 
 %build
+# NG_INSTALL_SUFFIX also names the python package, whose modules import "netgen"
+# pybind11-stubgen would import netgen from /usr instead of the buildroot
 %cmake -B build \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
-	-DNG_INSTALL_SUFFIX=netgen-mesher \
+	-DBUILD_STUB_FILES=OFF \
+	-DNG_INSTALL_SUFFIX=netgen \
 	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/%{name} \
 	-DNG_INSTALL_DIR_LIB=%{_libdir} \
 	-DNG_INSTALL_DIR_CMAKE=%{_libdir}/cmake/%{name} \
@@ -219,7 +220,8 @@ export CXX=mpicxx
 %cmake -B build-mpich \
 	-DUSE_SUPERBUILD=OFF \
 	-DUSE_NATIVE_ARCH=OFF \
-	-DNG_INSTALL_SUFFIX=netgen-mesher \
+	-DBUILD_STUB_FILES=OFF \
+	-DNG_INSTALL_SUFFIX=netgen \
 	-DNG_INSTALL_DIR_INCLUDE=%{_includedir}/mpich/%{name} \
 	-DNG_INSTALL_DIR_BIN=%{_libdir}/mpich/bin/ \
 	-DNG_INSTALL_DIR_LIB=%{_libdir}/mpich/lib/ \
@@ -306,7 +308,7 @@ rm -rf $RPM_BUILD_ROOT
 %files common
 %defattr(644,root,root,755)
 %doc AUTHORS doc/ng4.pdf
-%{_datadir}/%{name}
+%{_datadir}/netgen
 %{_iconsdir}/hicolor/48x48/apps/netgen-mesher.png
 %{_desktopdir}/netgen-mesher.desktop
 
@@ -333,11 +335,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files -n python3-%{name}
 %defattr(644,root,root,755)
-%dir %{py3_sitedir}/netgen-mesher
-%{py3_sitedir}/netgen-mesher/*.py
-%{py3_sitedir}/netgen-mesher/libngguipy.so
-%{py3_sitedir}/netgen-mesher/libngpy.so
-%{py3_sitedir}/netgen-mesher/config
+%dir %{py3_sitedir}/netgen
+%{py3_sitedir}/netgen/*.py
+%{py3_sitedir}/netgen/libngguipy.so
+%{py3_sitedir}/netgen/libngpy.so
+%{py3_sitedir}/netgen/config
 %{py3_sitedir}/netgen_mesher-py3.egg-info
 %dir %{py3_sitedir}/pyngcore
 %{py3_sitedir}/pyngcore/*.py

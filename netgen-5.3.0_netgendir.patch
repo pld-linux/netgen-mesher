@@ -9,7 +9,7 @@ diff -rupN netgen-5.3.0/ng/ngappinit.cpp netgen-5.3.0-new/ng/ngappinit.cpp
 -    ngdir = ".";
 -  
 +  else {
-+    ngdir = "/usr/share/netgen-mesher";
++    ngdir = "/usr/share/netgen";
 +    setenv("NETGENDIR", ngdir.c_str(), 1);
 +  }
 +
