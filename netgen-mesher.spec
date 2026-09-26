@@ -9,7 +9,7 @@ Summary:	Automatic mesh generation tool
 Summary(pl.UTF-8):	Narzędzie do automatycznego generowania siatek
 Name:		netgen-mesher
 Version:	6.2.2607
-Release:	1
+Release:	2
 License:	LGPL v2
 Group:		Applications/Science
 Source0:	https://github.com/NGSolve/netgen/archive/v%{version}/netgen-%{version}.tar.gz
